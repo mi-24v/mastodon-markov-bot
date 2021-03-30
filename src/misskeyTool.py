@@ -26,9 +26,10 @@ def fetch_notes(domain: str, access_token: str, account_id: str, params: dict):
     return res.json()
 
 
-def post_note(domain: str, access_token: str, params: dict):
+def post_note(domain: str, access_token: str, content: str, params: dict):
     payload = {
-        "i": access_token
+        "i": access_token,
+        "text": content
     }
     payload.update(params)
     res = requests.post("https://{}/api/notes/create".format(domain), json=payload)
@@ -36,3 +37,7 @@ def post_note(domain: str, access_token: str, params: dict):
         print("ノートの投稿に失敗しました。", file=sys.stderr)
         res.raise_for_status()
     return res.json()
+
+
+def generate_fetched_notes(domain, access_token, account_id, params):
+    raise NotImplementedError()  # TODO loadMastdonAPI相当のもの

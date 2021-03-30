@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-from os import access
 import re
 import requests
-import json
 
 
 def get_account_info(domain, access_token):

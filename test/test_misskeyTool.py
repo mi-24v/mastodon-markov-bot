@@ -41,10 +41,9 @@ def test_fetch_notes(access_info, access_token, account_id):
 def test_post_note(access_info, access_token):
     param = {
         "visibility": "home",
-        "text": "test",
         "localOnly": True
     }
     try:
-        assert post_note(access_info, access_token, param)
+        assert post_note(access_info, access_token, "test", param)
     except Exception as e:
         pytest.fail(str(e))

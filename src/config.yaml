@@ -1,0 +1,19 @@
+core:
+  # mastdon か misskey か pleroma(未実装)が選択可能 あとは知らん
+  activitypub_software : misskey
+read_mastdon:
+  # リプライを除外
+  exclude_replies : 1
+  # ブーストを除外
+  exclude_reblogs : 1
+read_misskey:
+  # リプライを除外
+  includeReplies : false
+  # リノートを除外
+  includeMyRenotes : false
+write_mastdon:
+  # 公開範囲
+  visibility : unlisted
+write_misskey:
+  # 公開範囲
+  visibility : home

@@ -2,6 +2,10 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: markov bot for ActivityPub(mastdon/misskey)
 
+Parameters:
+  ECRImageUri:
+    Type: String
+
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -68,6 +72,7 @@ Resources:
       DockerTag: mastdon-markov-bot_python3.8
     Properties:
       PackageType: Image
+      ImageUri: !Ref ECRImageUri
       Timeout: 120
       Events:
         PostActivityPub:

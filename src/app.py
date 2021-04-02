@@ -27,8 +27,12 @@ def worker():
     with open("./chainfiles/{}@{}.json".format(account_info["username"].lower(), config.domain)) as f:
         textModel = markovify.Text.from_json(f.read())
         sentence = textModel.make_sentence(tries=300)
+        if re.search(r'https?://', sentence):
+            # リンク入りはスキップ
+            print('投稿をスキップしました: {}'.format(sentence))
+            return
         sentence = "".join(sentence.split()) + ' #bot'
-        sentence = re.sub(r'(:.*?:)', r' \1 ', sentence)
+        sentence = re.sub(r'(:.*?:)', r' \1 ', sentence)  # 絵文字にスペース
         print(sentence)
     try:
         ActivityPubTool.post_activity(config, sentence)
@@ -50,5 +54,5 @@ def schedule(f, interval=1200, wait=True):
 
 if __name__ == "__main__":
     # 定期実行部分
-    schedule(worker)
+    schedule(worker, 120)
     # worker()

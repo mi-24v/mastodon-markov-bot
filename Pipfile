@@ -6,12 +6,15 @@ verify_ssl = true
 [dev-packages]
 autopep8 = "*"
 flake8 = "*"
+pytest = "*"
 
 [packages]
 requests = "*"
 pandas = "*"
 markovify = "*"
 mecab-python3 = "==0.996.5"
+python-dotenv = "*"
+pyyaml = "*"
 
 [requires]
 python_version = "3.8"

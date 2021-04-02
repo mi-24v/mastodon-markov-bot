@@ -1,5 +1,7 @@
 import requests
 import sys
+import logging
+import re
 
 
 def get_account_info(domain: str, access_token: str):
@@ -8,7 +10,7 @@ def get_account_info(domain: str, access_token: str):
     }
     res = requests.post("https://{}/api/i".format(domain), json=payload)
     if res.status_code != 200:
-        print("アカウント情報のリクエストに失敗しました。", file=sys.stderr)
+        logging.error("アカウント情報のリクエストに失敗しました。")
         res.raise_for_status()
     return res.json()
 
@@ -21,7 +23,7 @@ def fetch_notes(domain: str, access_token: str, account_id: str, params: dict):
     payload.update(params)
     res = requests.post("https://{}/api/users/notes".format(domain), json=payload)
     if res.status_code != 200:
-        print("ノートの取得リクエストに失敗しました。", file=sys.stderr)
+        logging.error("ノートの取得リクエストに失敗しました。")
         res.raise_for_status()
     return res.json()
 

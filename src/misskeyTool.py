@@ -1,7 +1,9 @@
 import requests
 import sys
-import logging
 import re
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
 def get_account_info(domain: str, access_token: str):
@@ -10,7 +12,7 @@ def get_account_info(domain: str, access_token: str):
     }
     res = requests.post("https://{}/api/i".format(domain), json=payload)
     if res.status_code != 200:
-        logging.error("アカウント情報のリクエストに失敗しました。")
+        logger.error("アカウント情報のリクエストに失敗しました。")
         res.raise_for_status()
     return res.json()
 
@@ -23,7 +25,7 @@ def fetch_notes(domain: str, access_token: str, account_id: str, params: dict):
     payload.update(params)
     res = requests.post("https://{}/api/users/notes".format(domain), json=payload)
     if res.status_code != 200:
-        logging.error("ノートの取得リクエストに失敗しました。")
+        logger.error("ノートの取得リクエストに失敗しました。")
         res.raise_for_status()
     return res.json()
 
@@ -56,17 +58,17 @@ def fetch_notes_loop(domain: str, access_token: str, account_id: str, params: di
                 last_read_id = note["id"]
                 text = note["text"]
                 if note["visibility"] == "followers" or note["visibility"] == "specified":
-                    logging.info("プライベート投稿のためスキップ: {}".format(text))
+                    logger.info("プライベート投稿のためスキップ: {}".format(text))
                     continue
                 elif filter_contents(text):
-                    logging.info("フィルタにヒットしたためスキップ: {}".format(text))
+                    logger.info("フィルタにヒットしたためスキップ: {}".format(text))
                     continue
                 else:
-                    logging.info("[note] {}".format(text))
+                    logger.info("[note] {}".format(text))
                     notes.append(text)
                 params["untilId"] = last_read_id
         except Exception as e:
-            logging.error("Error: {}".format(e))
+            logger.error("Error: {}".format(e))
             break
     # 重複投稿を削除
     result_notes = list(set(notes))

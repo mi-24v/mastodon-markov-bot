@@ -14,14 +14,14 @@ from src.config import config
 def worker():
     # 学習
 
-    account_info = ActivityPubTool.get_account_info(config.domain)
+    account_info = ActivityPubTool.get_account_info(config)
     filename = "{}@{}".format(account_info["username"], config.domain)
     filepath = os.path.join("./chainfiles", os.path.basename(filename.lower()) + ".json")
     if os.path.isfile(filepath) and datetime.datetime.now().timestamp() - os.path.getmtime(filepath) < 60 * 60 * 24:
         print("モデルは再生成されません")
     else:
         exportModel.generateAndExport(
-            ActivityPubTool.interact_activitypub_api(config.domain, config.read_access_token, account_info['id'],), filepath)
+            ActivityPubTool.interact_activitypub_api(config, account_info['id']), filepath)
         print("LOG,GENMODEL," + str(datetime.datetime.now()) + "," + account_info["username"].lower())   # Log
     # 生成
     with open("./chainfiles/{}@{}.json".format(account_info["username"].lower(), config.domain)) as f:

@@ -29,8 +29,8 @@ class BotConfig:
     write_access_token: str
     activitypub_software: ActivityPubSoftware
 
-    def __init__(self):
-        with open("config.yaml") as f:
+    def __init__(self, config_path: str):
+        with open(config_path, "r") as f:
             self.config_kv = load(f, Loader=CLoader)
 
         self.activitypub_software = ActivityPubSoftware.from_str(self.config_kv["core"]["activitypub_software"])
@@ -46,4 +46,8 @@ class BotConfig:
             self.write_access_token = os.environ["WRITE_ACCESS_TOKEN"]
 
 
-config = BotConfig()
+CONFIG_PATH = os.environ.get("CONFIG_PATH")
+if CONFIG_PATH is None:
+    config = BotConfig(os.path.join(os.path.relpath(__file__), "config.yaml"))
+else:
+    config = BotConfig(os.path.join(CONFIG_PATH))

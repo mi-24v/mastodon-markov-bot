@@ -16,7 +16,7 @@ def worker():
 
     account_info = get_account_info(config)
     filename = "{}@{}".format(account_info["username"], config.domain)
-    filepath = os.path.join("./chainfiles", os.path.basename(filename.lower()) + ".json")
+    filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "chainfiles", os.path.basename(filename.lower()) + ".json")
     if os.path.isfile(filepath) and datetime.datetime.now().timestamp() - os.path.getmtime(filepath) < 60 * 60 * 24:
         print("モデルは再生成されません")
     else:
@@ -24,7 +24,7 @@ def worker():
             interact_activitypub_api(config, account_info['id']), filepath)
         print("LOG,GENMODEL," + str(datetime.datetime.now()) + "," + account_info["username"].lower())   # Log
     # 生成
-    with open("./chainfiles/{}@{}.json".format(account_info["username"].lower(), config.domain)) as f:
+    with open(filepath) as f:
         textModel = markovify.Text.from_json(f.read())
         sentence = textModel.make_sentence(tries=300)
         sentence = "".join(sentence.split()) + ' #bot'

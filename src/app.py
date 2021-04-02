@@ -1,27 +1,27 @@
 #!/usr/bin/env python3
 import time
 import threading
-import ActivityPubTool
 import os
 import datetime
 import markovify
-import exportModel
 import re
 
 from src.config import config
+from src.ActivityPubTool import get_account_info, interact_activitypub_api, post_activity
+from src.exportModel import generateAndExport
 
 
 def worker():
     # 学習
 
-    account_info = ActivityPubTool.get_account_info(config)
+    account_info = get_account_info(config)
     filename = "{}@{}".format(account_info["username"], config.domain)
     filepath = os.path.join("./chainfiles", os.path.basename(filename.lower()) + ".json")
     if os.path.isfile(filepath) and datetime.datetime.now().timestamp() - os.path.getmtime(filepath) < 60 * 60 * 24:
         print("モデルは再生成されません")
     else:
-        exportModel.generateAndExport(
-            ActivityPubTool.interact_activitypub_api(config, account_info['id']), filepath)
+        generateAndExport(
+            interact_activitypub_api(config, account_info['id']), filepath)
         print("LOG,GENMODEL," + str(datetime.datetime.now()) + "," + account_info["username"].lower())   # Log
     # 生成
     with open("./chainfiles/{}@{}.json".format(account_info["username"].lower(), config.domain)) as f:
@@ -31,7 +31,7 @@ def worker():
         sentence = re.sub(r'(:.*?:)', r' \1 ', sentence)
         print(sentence)
     try:
-        ActivityPubTool.post_activity(config, sentence)
+        post_activity(config, sentence)
     except Exception as e:
         print("投稿エラー: {}".format(e))
 

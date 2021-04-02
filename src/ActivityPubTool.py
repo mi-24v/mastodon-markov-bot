@@ -58,7 +58,8 @@ def interact_activitypub_api(config: BotConfig, account_id: str):
         activities = misskeyTool.generate_fetched_notes(config.domain,
                                                         config.read_access_token,
                                                         account_id,
-                                                        config.config_kv["read_misskey"].copy())
+                                                        config.config_kv["read_misskey"].copy(),
+                                                        config.config_kv["core"]["source_activity_count"])
     else:
         raise NotImplementedException("unknown software")
     return activities

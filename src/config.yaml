@@ -1,6 +1,8 @@
 core:
   # mastdon か misskey か pleroma(未実装)が選択可能 あとは知らん
   activitypub_software : misskey
+  # 1回の学習時に食わせる投稿フェッチ回数(多分)
+  source_activity_count: 200
 read_mastdon:
   # リプライを除外
   exclude_replies : 1

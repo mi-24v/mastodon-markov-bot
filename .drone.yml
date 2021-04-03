@@ -1,5 +1,6 @@
 ---
-kind: pipline
+kind: pipeline
+type: docker
 name: normal-image
 
 workspace:
@@ -59,7 +60,8 @@ steps:
         - failure
 
 ---
-kind: pipline
+kind: pipeline
+type: docker
 name: lambda-image
 
 workspace:

@@ -96,6 +96,8 @@ steps:
         from_secret: ecr_secret
       registry:
         from_secret: ecr_repository
+      auth:
+        from_secret: ecr_auth_token
       squash: true
     when:
       branch:

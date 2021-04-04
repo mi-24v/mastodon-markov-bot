@@ -130,3 +130,7 @@ dmypy.json
 
 #dotenv
 src/.env
+
+# AWS SAM
+.aws-sam
+samconfig.toml

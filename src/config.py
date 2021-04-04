@@ -48,6 +48,6 @@ class BotConfig:
 
 CONFIG_PATH = os.environ.get("CONFIG_PATH")
 if CONFIG_PATH is None:
-    config = BotConfig(os.path.join(os.path.relpath(__file__), "config.yaml"))
+    config = BotConfig(os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.yaml"))
 else:
     config = BotConfig(os.path.join(CONFIG_PATH))

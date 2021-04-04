@@ -17,7 +17,7 @@ def lambda_handler(event, context):
 
 def access_between_local_and_s3(local_path: str, mode: str):
     bucket_name = os.environ["S3_BUCKET"]
-    s3 = boto3.client("s3")
+    s3 = boto3.resource("s3")
     filename = PurePath(local_path).name
     if mode == "upload":
         s3.meta.client.upload_file(local_path, bucket_name, filename)

@@ -38,6 +38,7 @@ Resources:
                   - "logs:PutLogEvents"
                   - "s3:PutObject"
                   - "s3:GetObject"
+                  - "s3:ListBucket"
                   - "ssm:GetParameter"
                 Resource: "*"
 

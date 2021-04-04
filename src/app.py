@@ -19,7 +19,8 @@ def worker():
     filepath = os.environ.get("DICTIONARY_FILEPATH")
     if filepath is None:
         filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "chainfiles", os.path.basename(filename.lower()) + ".json")
-    if os.path.isfile(filepath) and datetime.datetime.now().timestamp() - os.path.getmtime(filepath) < 60 * 60 * 24:
+    # TODO lambdaで/tmp使いまわしのときにtimestampを無視する(falseは仮)
+    if os.path.isfile(filepath) and datetime.datetime.now().timestamp() - os.path.getmtime(filepath) < 60 * 60 * 24 and False:
         print("モデルは再生成されません")
     else:
         generateAndExport(

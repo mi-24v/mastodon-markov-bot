@@ -3,15 +3,19 @@ import boto3
 from pathlib import PurePath
 import botocore.exceptions
 from src.app import worker
+from src.config import BotConfig
 
 
 def lambda_handler(event, context):
-    dictionary_path = os.environ["DICTIONARY_FILEPATH"]
+    config: BotConfig = BotConfig.load()
+    dictionary_path = config.dictionary_filepath
+    if dictionary_path is None:
+        raise ValueError("dictionary path must be specified")
     access_between_local_and_s3(dictionary_path, "download")
-    os.environ["READ_DOMAIN"] = fetch_ssm_parm("mastdon-markov-bot.read_domain")
-    os.environ["READ_ACCESS_TOKEN"] = fetch_ssm_parm("mastdon-markov-bot.read_access_token")
-    os.environ["WRITE_ACCESS_TOKEN"] = fetch_ssm_parm("mastdon-markov-bot.write_access_key")
-    worker()
+    config.domain = fetch_ssm_parm("mastdon-markov-bot.read_domain")
+    config.read_access_token = fetch_ssm_parm("mastdon-markov-bot.read_access_token")
+    config.write_access_token = fetch_ssm_parm("mastdon-markov-bot.write_access_key")
+    worker(config)
     access_between_local_and_s3(dictionary_path, "upload")
 
 

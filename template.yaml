@@ -53,6 +53,7 @@ Resources:
       PackageType: Image
       ImageUri: !Ref ECRImageUri
       Timeout: 900 # 極端に遅いときのために最大にしておく
+      MemorySize: 1024
       Events:
         PostActivityPub:
           Type: Schedule

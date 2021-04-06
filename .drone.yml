@@ -83,7 +83,7 @@ steps:
         - push
 
   - name: build lambda image
-    image: plugins/ecr
+    image: plugins/docker
     settings:
       repo: mastdon-markov-bot
       region: ap-northeast-3
@@ -96,8 +96,8 @@ steps:
         from_secret: ecr_secret
       registry:
         from_secret: ecr_repository
-      auth:
-        from_secret: ecr_auth_token
+#      auth:
+#        from_secret: ecr_auth_token
       squash: true
     when:
       branch:

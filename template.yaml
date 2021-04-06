@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: markov bot for ActivityPub(mastdon/misskey)
+
+Parameters:
+  ECRImageUri:
+    Type: String
+  DictionaryPath:
+    Type: String
+
+Resources:
+  MarkovBotDictionaryBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+  MarkovBotRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "Mastdon-Markov-Bot-LambdaPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                  - "s3:PutObject"
+                  - "s3:GetObject"
+                  - "s3:ListBucket"
+                  - "ssm:GetParameter"
+                Resource: "*"
+
+  WorkerFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      Dockerfile: lambda.Dockerfile
+      DockerContext: .
+      DockerTag: mastdon-markov-bot_python3.8
+    Properties:
+      Role: !GetAtt MarkovBotRole.Arn
+      PackageType: Image
+      ImageUri: !Ref ECRImageUri
+      Timeout: 900 # 極端に遅いときのために最大にしておく
+      MemorySize: 1024
+      Events:
+        PostActivityPub:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0/20 * * * ? *) # 20分毎に実行
+      Environment:
+        Variables:
+          DICTIONARY_FILEPATH: !Ref DictionaryPath
+          S3_BUCKET: !Ref MarkovBotDictionaryBucket
+  WorkerFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${WorkerFunction}
+      RetentionInDays: 1

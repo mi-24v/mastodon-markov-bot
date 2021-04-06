@@ -27,14 +27,16 @@ class BotConfig:
     domain: str
     read_access_token: str
     write_access_token: str
+    dictionary_filepath: str = None
     activitypub_software: ActivityPubSoftware
 
-    def __init__(self):
-        with open("config.yaml") as f:
+    def __init__(self, config_path: str):
+        with open(config_path, "r") as f:
             self.config_kv = load(f, Loader=CLoader)
 
         self.activitypub_software = ActivityPubSoftware.from_str(self.config_kv["core"]["activitypub_software"])
 
+        self.dictionary_filepath = os.environ.get("DICTIONARY_FILEPATH")
         self.domain = os.environ.get('READ_DOMAIN')
         self.read_access_token = os.environ.get('READ_ACCESS_TOKEN')
         self.write_access_token = os.environ.get('WRITE_ACCESS_TOKEN')
@@ -45,5 +47,11 @@ class BotConfig:
             self.read_access_token = os.environ["READ_ACCESS_TOKEN"]
             self.write_access_token = os.environ["WRITE_ACCESS_TOKEN"]
 
-
-config = BotConfig()
+    @classmethod
+    def load(cls):
+        config_path = os.environ.get("CONFIG_PATH")
+        if config_path is None:
+            config = BotConfig(os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.yaml"))
+        else:
+            config = BotConfig(os.path.join(config_path))
+        return config

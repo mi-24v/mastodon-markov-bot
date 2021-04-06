@@ -9,89 +9,13 @@ Parameters:
     Type: String
 
 Resources:
-  VPC:
-    Type: AWS::EC2::VPC
+  MarkovBotDictionaryBucket:
+    Type: AWS::S3::Bucket
     Properties:
-      CidrBlock: 10.192.0.0/16
-      EnableDnsSupport: true
-      EnableDnsHostnames: true
-  InternetGateway:
-    Type: AWS::EC2::InternetGateway
-  InternetGatewayAttachment:
-    Type: AWS::EC2::VPCGatewayAttachment
-    Properties:
-      InternetGatewayId: !Ref InternetGateway
-      VpcId: !Ref VPC
-  Subnet:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      AvailabilityZone: !Select [0, !GetAZs ""]
-      CidrBlock: 10.192.1.0/24
-      MapPublicIpOnLaunch: true
-  RouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-  InternetRoute:
-    Type: AWS::EC2::Route
-    DependsOn:
-      - InternetGateway
-      - InternetGatewayAttachment
-    Properties:
-      RouteTableId: !Ref RouteTable
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway
-  RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref Subnet
-      RouteTableId: !Ref RouteTable
-  LambdaSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      VpcId:
-        !Ref VPC
-      GroupDescription: Security group for Lambda
-  MountTargetSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      VpcId: !Ref VPC
-      GroupName: "security-group"
-      GroupDescription: Security group for mount target
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 2049
-          ToPort: 2049
-          CidrIp: 0.0.0.0/0
-
-  FileSystem:
-    Type: AWS::EFS::FileSystem
-    Properties:
-      PerformanceMode: generalPurpose
-      ThroughputMode: bursting
-      Encrypted: true
-  AccessPoint:
-    Type: AWS::EFS::AccessPoint
-    Properties:
-      FileSystemId: !Ref FileSystem
-      PosixUser:
-        Uid: 1001
-        Gid: 1001
-      RootDirectory:
-        CreationInfo:
-          OwnerGid: 1001
-          OwnerUid: 1001
-          Permissions: 755
-        Path: /ditionary-data
-  MountTarget:
-    Type: AWS::EFS::MountTarget
-    Properties:
-      FileSystemId: !Ref FileSystem
-      SecurityGroups:
-        - !Ref MountTargetSecurityGroup
-      SubnetId: !Ref Subnet
-
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
   MarkovBotRole:
     Type: AWS::IAM::Role
     Properties:
@@ -112,14 +36,9 @@ Resources:
                   - "logs:CreateLogGroup"
                   - "logs:CreateLogStream"
                   - "logs:PutLogEvents"
-                  - "ec2:CreateNetworkInterface"
-                  - "ec2:DetachNetworkInterface"
-                  - "ec2:DescribeNetworkInterfaces"
-                  - "ec2:DeleteNetworkInterface"
-                  - "ec2:AssignPrivateIpAddresses"
-                  - "ec2:UnassignPrivateIpAddresses"
-                  - "elasticfilesystem:ClientMount"
-                  - "elasticfilesystem:ClientWrite"
+                  - "s3:PutObject"
+                  - "s3:GetObject"
+                  - "s3:ListBucket"
                   - "ssm:GetParameter"
                 Resource: "*"
 
@@ -134,27 +53,16 @@ Resources:
       PackageType: Image
       ImageUri: !Ref ECRImageUri
       Timeout: 900 # 極端に遅いときのために最大にしておく
+      MemorySize: 1024
       Events:
         PostActivityPub:
           Type: Schedule
           Properties:
             Schedule: cron(0/20 * * * ? *) # 20分毎に実行
-      Policies:
-        - EFSWriteAccessPolicy:
-            FileSystem: !Ref FileSystem
-            AccessPoint: !Ref AccessPoint
-        - VPCAccessPolicy: {}
-      VpcConfig:
-        SecurityGroupIds:
-          - !Ref LambdaSecurityGroup
-        SubnetIds:
-          - !Ref Subnet
-      FileSystemConfigs:
-        - Arn: !GetAtt AccessPoint.Arn
-          LocalMountPath: /mnt/chainfiles
       Environment:
         Variables:
           DICTIONARY_FILEPATH: !Ref DictionaryPath
+          S3_BUCKET: !Ref MarkovBotDictionaryBucket
   WorkerFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:

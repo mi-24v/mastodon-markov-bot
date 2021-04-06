@@ -58,6 +58,9 @@ def fetch_notes_loop(domain: str, access_token: str, account_id: str, params: di
                 if note["visibility"] == "followers" or note["visibility"] == "specified":
                     logging.info("プライベート投稿のためスキップ: {}".format(text))
                     continue
+                elif text is None:
+                    logging.info("テキストなし投稿")
+                    continue
                 elif filter_contents(text):
                     logging.info("フィルタにヒットしたためスキップ: {}".format(text))
                     continue
@@ -66,7 +69,7 @@ def fetch_notes_loop(domain: str, access_token: str, account_id: str, params: di
                     notes.append(text)
                 params["untilId"] = last_read_id
         except Exception as e:
-            logging.error("Error: {}".format(e))
+            logging.exception("Error: {}".format(e))
             break
     # 重複投稿を削除
     result_notes = list(set(notes))

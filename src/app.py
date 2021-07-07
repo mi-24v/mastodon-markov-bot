@@ -23,7 +23,7 @@ def worker(bot_config: BotConfig):
                                            os.path.basename(filename.lower()) + ".json")
     if os.path.isfile(dictionary_filepath)\
             and datetime.datetime.now().timestamp() - os.path.getmtime(dictionary_filepath) < 60 * 60 * 24\
-            and not bot_config.config_kv.get("force_remodel"):
+            and not bot_config.config_kv["core"].get("force_remodel"):
         print("モデルは再生成されません")
     else:
         generateAndExport(

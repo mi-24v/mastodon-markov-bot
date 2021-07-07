@@ -21,10 +21,9 @@ def worker(bot_config: BotConfig):
         dictionary_filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                            "chainfiles",
                                            os.path.basename(filename.lower()) + ".json")
-    # TODO lambdaで/tmp使いまわしのときにtimestampを無視する(falseは仮)
     if os.path.isfile(dictionary_filepath)\
             and datetime.datetime.now().timestamp() - os.path.getmtime(dictionary_filepath) < 60 * 60 * 24\
-            and False:
+            and not bot_config.config_kv.get("force_remodel"):
         print("モデルは再生成されません")
     else:
         generateAndExport(

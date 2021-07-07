@@ -1,6 +1,6 @@
 import os
 import pytest
-from src.misskeyTool import get_account_info, fetch_notes, post_note
+from src.misskeyTool import get_account_info, fetch_notes, post_note, filter_contents
 
 
 @pytest.fixture(scope="session")
@@ -47,3 +47,14 @@ def test_post_note(access_info, access_token):
         assert post_note(access_info, access_token, "test", param)
     except Exception as e:
         pytest.fail(str(e))
+
+
+def test_filter_true():
+    # メンション文字
+    assert filter_contents("論文も書かず研究もせず寝てる( @miwpayou0808@miwkey.miwpayou0808.info )") is True
+    assert filter_contents("うんこ製造機(\n@miwpayou0808@miwkey.miwpayou0808.info )") is True
+    # リンク
+    assert filter_contents("https://github.com/mi-24v/mastodon-markov-bot/blob/main/src/app.py#L14 例えばこう") is True
+    # 引用
+    assert filter_contents("> ＞Storman氏が無職だと主張したため、約210万ドルもの賠償金は、今後3500年間、毎月50ドルずつ分割して支払われることになりました。\n🈚") is True
+

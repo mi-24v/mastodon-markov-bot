@@ -42,8 +42,8 @@ def post_note(domain: str, access_token: str, content: str, params: dict):
 
 
 def filter_contents(content_text: str) -> bool:
-    # メンション文字(@)から始まる単語かリンクを含むときマッチ
-    search_hits = re.search(r"@\w|https?://", content_text)
+    # メンション文字(@)から始まる単語,リンク,引用を含むときマッチ
+    search_hits = re.search(r"@\w|https?://|^> ", content_text)
     return False if search_hits is None else True
 
 
